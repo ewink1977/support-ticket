@@ -73,7 +73,6 @@ const loginUser = asyncHandler(async (req, res) => {
 // @desc Get Current User!
 // @route /api/users/me
 // @access Protected
-
 const getMe = asyncHandler(async (req, res) => {
 	const user = {
 		id: req.user._id,
