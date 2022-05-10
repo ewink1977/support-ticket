@@ -20,6 +20,33 @@ const getTickets = asyncHandler(async (req, res) => {
 	res.status(200).json(tickets)
 })
 
+// @desc Get Single User Ticket
+// @route GET /api/tickets/:id
+// @access Protected
+const getTicket = asyncHandler(async (req, res) => {
+	// Get Current User via JWT
+	const user = await User.findById(req.user.id)
+
+	if (!user) {
+		res.status(401)
+		throw new Error('User not found...')
+	}
+
+	const ticket = await Ticket.findById(req.params.id)
+
+	if (!ticket) {
+		res.status(404)
+		throw new Error('Ticket Not Found.')
+	}
+
+	if (ticket.user.toString() !== req.user.id) {
+		res.status(401)
+		throw new Error('You are not authorized to view this ticket.')
+	}
+
+	res.status(200).json(ticket)
+})
+
 // @desc Create User Tickets
 // @route POST /api/tickets
 // @access Protected
@@ -49,7 +76,72 @@ const createTicket = asyncHandler(async (req, res) => {
 	res.status(201).json(ticket)
 })
 
+// @desc Delete Single User Ticket
+// @route DELETE /api/tickets/:id
+// @access Protected
+const deleteTicket = asyncHandler(async (req, res) => {
+	// Get Current User via JWT
+	const user = await User.findById(req.user.id)
+
+	if (!user) {
+		res.status(401)
+		throw new Error('User not found...')
+	}
+
+	const ticket = await Ticket.findById(req.params.id)
+
+	if (!ticket) {
+		res.status(404)
+		throw new Error('Ticket Not Found.')
+	}
+
+	if (ticket.user.toString() !== req.user.id) {
+		res.status(401)
+		throw new Error('You are not authorized to view this ticket.')
+	}
+
+	await ticket.remove()
+
+	res.status(200).json({ success: true })
+})
+
+// @desc Update Single User Ticket
+// @route PUT /api/tickets/:id
+// @access Protected
+const updateTicket = asyncHandler(async (req, res) => {
+	// Get Current User via JWT
+	const user = await User.findById(req.user.id)
+
+	if (!user) {
+		res.status(401)
+		throw new Error('User not found...')
+	}
+
+	const ticket = await Ticket.findById(req.params.id)
+
+	if (!ticket) {
+		res.status(404)
+		throw new Error('Ticket Not Found.')
+	}
+
+	if (ticket.user.toString() !== req.user.id) {
+		res.status(401)
+		throw new Error('You are not authorized to view this ticket.')
+	}
+
+	const updatedTicket = await Ticket.findByIdAndUpdate(
+		req.params.id,
+		req.body,
+		{ new: true }
+	)
+
+	res.status(200).json(updatedTicket)
+})
+
 module.exports = {
 	getTickets,
 	createTicket,
+	getTicket,
+	deleteTicket,
+	updateTicket,
 }
